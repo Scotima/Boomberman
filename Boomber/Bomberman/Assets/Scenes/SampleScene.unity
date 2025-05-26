@@ -550,6 +550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 2
   moveInterval: 1
+  characterId: 
   map: {fileID: 167518523}
 --- !u!212 &1439601594
 SpriteRenderer:

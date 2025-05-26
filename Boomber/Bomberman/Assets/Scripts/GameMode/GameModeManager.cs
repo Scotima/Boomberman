@@ -48,7 +48,14 @@ public class GameModeManager : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            Instantiate(playerPrefabs[i], generatedSpawnPoints[i].position, Quaternion.identity);
+            GameObject playerObj = Instantiate(playerPrefabs[i], generatedSpawnPoints[i].position, Quaternion.identity); // 실제 게임 캐릭터 소환.
+            string characterId = GameInstance.Instance.GenerateCharacterId("Player");
+
+            var character = playerObj.GetComponent<AICharacter>();
+
+            character.characterId = characterId;
+
+            GameInstance.Instance.RegisterCharacter(characterId, new CharacterStat());
         }
     }
 

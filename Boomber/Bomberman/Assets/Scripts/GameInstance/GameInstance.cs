@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.Progress;
+using UnityEngine.TextCore.Text;
 
 ///<summary>
 /// 게임 전체 상태와 캐릭터 능력치를 관리하는 싱글턴 클래스.
@@ -11,6 +13,7 @@ public class GameInstance : MonoBehaviour
     public static GameInstance Instance { get;private set; }
 
     private Dictionary<string, CharacterStat> characterStats = new();
+    private Dictionary<string, int> idCounters = new();
 
 
     private void Awake()
@@ -46,12 +49,47 @@ public class GameInstance : MonoBehaviour
         return characterStats.TryGetValue(characterId, out var stat) ? stat : null;
     }
 
+
     ///<summary>
     /// 아이템 효과 적용.
     ///</summary>
     
-    public void ApplyItemToCharacter(string characterid)
+    public void ApplyItemToCharacter(string characterid, Item item)
     {
-        //todo 아이템 클래스 구현 이후에.
+       if(characterStats.TryGetValue(characterid, out var currentStat))
+        {
+            var effect = item.GetEffect();
+            var newStat = currentStat.Clone();
+
+            newStat.SetMoveSpeed(currentStat.GetMoveSpeed() + effect.moveSpeedDelta);
+            newStat.SetBombPower(currentStat.GetBombPower() + effect.boomPowerDelta);
+            newStat.SetBombCount(currentStat.GetBombCount() + effect.bombCountDelta);
+
+            characterStats[characterid] = newStat;
+
+            Debug.Log($"[GameInstance] {characterid}의 스탯이 아이템으로 갱신됨");
+
+            foreach (var character in FindObjectsOfType<AICharacter>())
+            {
+                if(character.characterId == characterid)
+                {
+                    character.UpdateStat(characterStats[characterid]);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 접두어(prefix)에 따라 고유한 문자열 ID를 생성한다.
+    /// 예: "AI_1", "Player_2"
+    /// </summary>
+    public string GenerateCharacterId(string prefix = "Character")
+    {
+        if (!idCounters.ContainsKey(prefix))
+            idCounters[prefix] = 1;
+        else
+            idCounters[prefix]++;
+
+        return $"{prefix}_{idCounters[prefix]}";
     }
 }

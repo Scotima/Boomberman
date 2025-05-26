@@ -50,17 +50,6 @@ public class CharacterStat
         isInvincible = value;
     }
 
-
-    ///<summary>
-    /// 아이템 효과를 적용하는 함수.
-    ///</summary>
-    
-    public void ApplyItem()
-    {
-        //일단 함수 선언만. 아이템 클래스 미 구현.
-    }
-
-
     ///<summary>
     /// 능력치 복사본 생성. <- 능력을 얼마나 지속시킬지를 위해서. 즉 원래상태로 되돌릴 수 도 있기 때문에 원본 지킴이
     /// 복사본 생성.
