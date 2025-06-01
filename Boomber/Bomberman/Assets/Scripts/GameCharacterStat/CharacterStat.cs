@@ -7,9 +7,9 @@ using UnityEngine;
 public class CharacterStat
 {
     [Header("능력치")]
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private int bombPower;
-    [SerializeField] private int bombCount;
+    [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private int bombPower = 1;
+    [SerializeField] private int bombCount = 1;
 
     [Header("기타 상태")]
     public bool canDestory;

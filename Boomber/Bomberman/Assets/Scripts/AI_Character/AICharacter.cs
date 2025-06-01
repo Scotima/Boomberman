@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.TextCore.Text;
+using static UnityEditor.PlayerSettings;
 
 public class AICharacter : MonoBehaviour
 {
@@ -13,16 +14,47 @@ public class AICharacter : MonoBehaviour
 
     [Header("참조")]
     public MakeMap map;
+    public GameObject bombPrefab;
+
+    private float bombCooldown = 3f;
+    private float bombTimer = 0f;
+
+    private bool isInitialized = false;
+
+    public void Initialize()
+    {
+        if (string.IsNullOrEmpty(characterId) || map == null || bombPrefab == null)
+        {
+            Debug.LogError($"[AICharacter] 초기화 실패! 필드 누락 - characterId: {characterId}, map: {map}, bombPrefab: {bombPrefab}");
+            return;
+        }
+
+        isInitialized = true;
+        GameInstance.Instance.RegisterCharacter(characterId, new CharacterStat());
+        Debug.Log($"[AICharacter] {characterId} 초기화 완료");
+    }
+
 
     private void Update()
     {
+        if (!isInitialized) return;
+
         moveTimer += Time.deltaTime;
+        bombTimer += Time.deltaTime;
+       // Debug.Log($"[AICharacter] 폭탄 타이머: {bombTimer}");
 
         //
-        if(moveTimer >= moveInterval)
+        if (moveTimer >= moveInterval)
         {
             moveTimer = 0f;
             TryMove(Vector2.right); // 테스트 오른쪽 이동
+        }
+
+        if (bombTimer >= bombCooldown)
+        {
+            Debug.Log($"[AICharacter] 폭탄 설치 조건 완성. 캐릭터 위치: {transform.position}");
+            bombTimer = 0f;
+            PlaceBomb();
         }
     }
 
@@ -41,6 +73,27 @@ public class AICharacter : MonoBehaviour
         {
             Debug.Log($"[AICharacter] 이동 불가: {tileCoord} 타일은 벽이거나 경계 밖입니다.");
         }
+    }
+
+    private void PlaceBomb()
+    {
+        
+        Vector3 placePos = new Vector3(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y), 0f);
+        Debug.Log($"[AICharacter] 폭탄 설치 시도! 위치: {placePos}");
+
+
+        GameObject bomb = Instantiate(bombPrefab, placePos, Quaternion.identity);
+
+        if(bomb.TryGetComponent<Bomb>(out var bombscript))
+        {
+            bombscript.ownerCharacterId = characterId;
+            Debug.Log($"[AICharacter] {characterId} 가 폭탄 설치");
+        }
+        else
+        {
+            Debug.LogWarning("[AICharacter] Bomb 스크립트를 찾을 수 없습니다.");
+        }
+
     }
 
 

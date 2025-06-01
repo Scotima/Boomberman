@@ -38,6 +38,9 @@ public class GameInstance : MonoBehaviour
         {
             characterStats[characterId] = stat; // 캐릭터가 아직 능력치를 배정받지 못했다면 능력치 할당.
         }
+
+        else
+            Debug.LogWarning($"[GameInstance] 이미 등록된 characterId: {characterId}");
     }
 
     ///<summary>
@@ -69,7 +72,7 @@ public class GameInstance : MonoBehaviour
 
             Debug.Log($"[GameInstance] {characterid}의 스탯이 아이템으로 갱신됨");
 
-            foreach (var character in FindObjectsOfType<AICharacter>())
+            foreach (var character in Object.FindObjectsByType<AICharacter>(FindObjectsSortMode.None))
             {
                 if(character.characterId == characterid)
                 {

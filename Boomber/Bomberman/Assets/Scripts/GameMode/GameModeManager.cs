@@ -11,6 +11,9 @@ public class GameModeManager : MonoBehaviour
     [Header("ÇÃ·¹ÀÌ¾î ÇÁ¸®ÆÕ")]
     public GameObject[] playerPrefabs;
 
+    [Header("ÆøÅº ÇÁ¸®ÆÕ")]
+    public GameObject bombPrefab;
+
     private bool gameStarted = false;
     private List<Transform> generatedSpawnPoints = new List<Transform>();
 
@@ -54,6 +57,13 @@ public class GameModeManager : MonoBehaviour
             var character = playerObj.GetComponent<AICharacter>();
 
             character.characterId = characterId;
+
+            character.map = mapGenerator;
+            character.bombPrefab = bombPrefab;
+
+            character.Initialize();
+            Debug.Log($"[GM] mapGenerator is null? {mapGenerator == null}");
+
 
             GameInstance.Instance.RegisterCharacter(characterId, new CharacterStat());
         }
