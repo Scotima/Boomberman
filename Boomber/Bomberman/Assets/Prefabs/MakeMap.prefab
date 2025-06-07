@@ -51,3 +51,4 @@ MonoBehaviour:
   tileSize: 1
   indestructibleOffset: {x: 0, y: 0, z: 0}
   destructibleOffset: {x: 0, y: 0, z: 0}
+  destructibleBoxParent: {fileID: 5306923977894721531, guid: 8f7ea02235290154e8e1ff5456c62457, type: 3}

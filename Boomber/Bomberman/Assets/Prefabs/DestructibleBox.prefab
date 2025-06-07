@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   possibleItemPrefabs:
-  - {fileID: 9169813686469001262, guid: 8bf9155a47af2dd448928e0160403f9e, type: 3}
+  - {fileID: 7439807079514454057, guid: 2e236e2076b7a5a49a6962eeb1baecf2, type: 3}
   - {fileID: 9169813686469001262, guid: 8bf9155a47af2dd448928e0160403f9e, type: 3}
   dropChance: 0.701
 --- !u!212 &402374602934681591
@@ -93,7 +93,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: 4707ec6bcb84fed428e044aa80a5e3e1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

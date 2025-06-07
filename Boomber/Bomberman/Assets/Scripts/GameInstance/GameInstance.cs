@@ -1,11 +1,12 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEditor.Progress;
 using UnityEngine.TextCore.Text;
+using System.Linq;
 
 ///<summary>
-/// °ÔÀÓ ÀüÃ¼ »óÅÂ¿Í Ä³¸¯ÅÍ ´É·ÂÄ¡¸¦ °ü¸®ÇÏ´Â ½Ì±ÛÅÏ Å¬·¡½º.
+/// ê²Œì„ ì „ì²´ ìƒíƒœì™€ ìºë¦­í„° ëŠ¥ë ¥ì¹˜ë¥¼ ê´€ë¦¬í•˜ëŠ” ì‹±ê¸€í„´ í´ë˜ìŠ¤.
 ///</summary>
 
 public class GameInstance : MonoBehaviour
@@ -14,6 +15,12 @@ public class GameInstance : MonoBehaviour
 
     private Dictionary<string, CharacterStat> characterStats = new();
     private Dictionary<string, int> idCounters = new();
+
+    private Dictionary<string, AICharacter> aiCharacters = new(); // âœ… ìƒˆë¡œ ì¶”ê°€!
+
+    public List<Vector2Int> destructibleBoxTiles = new();
+
+    public MakeMap map;
 
 
     private void Awake()
@@ -29,22 +36,23 @@ public class GameInstance : MonoBehaviour
     }
 
     /// <summary>
-    /// °ÔÀÓ Ä³¸¯ÅÍ µî·Ï(1¸í~8¸í±îÁö.)
+    /// ê²Œì„ ìºë¦­í„° ë“±ë¡(1ëª…~8ëª…ê¹Œì§€.)
     /// </summary>
     /// 
-    public void RegisterCharacter(string characterId, CharacterStat stat)
+    public void RegisterCharacter(string characterId, CharacterStat stat, AICharacter ai)
     {
         if(!characterStats.ContainsKey(characterId))
         {
-            characterStats[characterId] = stat; // Ä³¸¯ÅÍ°¡ ¾ÆÁ÷ ´É·ÂÄ¡¸¦ ¹èÁ¤¹ŞÁö ¸øÇß´Ù¸é ´É·ÂÄ¡ ÇÒ´ç.
+            characterStats[characterId] = stat; // ìºë¦­í„°ê°€ ì•„ì§ ëŠ¥ë ¥ì¹˜ë¥¼ ë°°ì •ë°›ì§€ ëª»í–ˆë‹¤ë©´ ëŠ¥ë ¥ì¹˜ í• ë‹¹.
+            aiCharacters[characterId] = ai;
         }
 
         else
-            Debug.LogWarning($"[GameInstance] ÀÌ¹Ì µî·ÏµÈ characterId: {characterId}");
+            Debug.LogWarning($"[GameInstance] ì´ë¯¸ ë“±ë¡ëœ characterId: {characterId}");
     }
 
     ///<summary>
-    ///Ä³¸¯ÅÍ ´É·ÂÄ¡ Á¶È¸
+    ///ìºë¦­í„° ëŠ¥ë ¥ì¹˜ ì¡°íšŒ
     ///</summary>
     
     public CharacterStat GetCharacterStat(string characterId)
@@ -54,7 +62,7 @@ public class GameInstance : MonoBehaviour
 
 
     ///<summary>
-    /// ¾ÆÀÌÅÛ È¿°ú Àû¿ë.
+    /// ì•„ì´í…œ íš¨ê³¼ ì ìš©.
     ///</summary>
     
     public void ApplyItemToCharacter(string characterid, Item item)
@@ -70,7 +78,7 @@ public class GameInstance : MonoBehaviour
 
             characterStats[characterid] = newStat;
 
-            Debug.Log($"[GameInstance] {characterid}ÀÇ ½ºÅÈÀÌ ¾ÆÀÌÅÛÀ¸·Î °»½ÅµÊ");
+            Debug.Log($"[GameInstance] {characterid}ì˜ ìŠ¤íƒ¯ì´ ì•„ì´í…œìœ¼ë¡œ ê°±ì‹ ë¨");
 
             foreach (var character in Object.FindObjectsByType<AICharacter>(FindObjectsSortMode.None))
             {
@@ -83,8 +91,8 @@ public class GameInstance : MonoBehaviour
     }
 
     /// <summary>
-    /// Á¢µÎ¾î(prefix)¿¡ µû¶ó °íÀ¯ÇÑ ¹®ÀÚ¿­ ID¸¦ »ı¼ºÇÑ´Ù.
-    /// ¿¹: "AI_1", "Player_2"
+    /// ì ‘ë‘ì–´(prefix)ì— ë”°ë¼ ê³ ìœ í•œ ë¬¸ìì—´ IDë¥¼ ìƒì„±í•œë‹¤.
+    /// ì˜ˆ: "AI_1", "Player_2"
     /// </summary>
     public string GenerateCharacterId(string prefix = "Character")
     {
@@ -94,5 +102,32 @@ public class GameInstance : MonoBehaviour
             idCounters[prefix]++;
 
         return $"{prefix}_{idCounters[prefix]}";
+    }
+
+    public void RegisterBox(Vector2Int tile)
+    {
+        if (!destructibleBoxTiles.Contains(tile))
+        {
+            destructibleBoxTiles.Add(tile);
+            //Debug.Log($"[GameInstance] ìƒì ë“±ë¡ë¨: {tile}");
+        }
+    }
+
+    public void RemoveBox(Vector2Int tile)
+    {
+        if (destructibleBoxTiles.Remove(tile))
+        {
+            Debug.Log($"[GameInstance] ìƒì ì œê±°ë¨: {tile}");
+        }
+    }
+
+    public List<AICharacter> GetLivingEnemies(string myId)
+    {
+        return aiCharacters.Values
+            .Where(ai => ai != null
+                      && ai.characterId != myId
+                      && ai.GetStat() != null
+                      && !ai.GetStat().GetIsDead())
+            .ToList();
     }
 }

@@ -5,7 +5,7 @@ public class Explosion : MonoBehaviour
     public AnimatedSpriteRenderer start;
     public AnimatedSpriteRenderer middle;
     public AnimatedSpriteRenderer end;
-
+    private string ownerId;
     public void SetActiveRenderer(AnimatedSpriteRenderer renderer)
     {
         start.enabled = renderer == start;
@@ -22,6 +22,26 @@ public class Explosion : MonoBehaviour
     public void DestroyAfter(float seconds)
     {
         Destroy(gameObject, seconds);
+    }
+
+    public void SetOwner(string id)
+    {
+        ownerId = id;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        AICharacter character = other.GetComponent<AICharacter>();
+        if (character == null) return;
+
+        if (character.characterId == ownerId)
+        {
+            Debug.Log($"[폭발] 자기 자신은 피해 없음: {ownerId}");
+            return;
+        }
+
+        character.TakeDamage(1);
+        Debug.Log($"[폭발] {character.characterId}이 폭발에 맞음");
     }
 
 }

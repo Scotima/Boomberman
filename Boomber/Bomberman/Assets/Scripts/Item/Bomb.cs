@@ -33,30 +33,36 @@ public class Bomb : MonoBehaviour
     {
         Vector2 origin = transform.position;
 
-        for (int i = 1; i <= range; i++) // i = 1부터 (중심 제외)
+        for (int i = 1; i <= range; i++)
         {
             Vector2 targetPos = origin + dir * i;
 
-            Collider2D[] hits = Physics2D.OverlapCircleAll(targetPos, 0.1f);
+            Collider2D[] hits = Physics2D.OverlapCircleAll(targetPos, 0.45f);
 
-            // 먼저 벽 판별
+            bool blocked = false;
+
             foreach (var hit in hits)
             {
                 if (hit.CompareTag("Indestructible"))
                 {
-                    return; // 폭발 차단
+                    blocked = true;
+                    break; // 막히지만 이펙트는 생성함
                 }
 
                 if (hit.TryGetComponent<DestructibleBox>(out var box))
                 {
-                    box.DestroyBox(); // 상자 파괴
-                    CreateExplosion(targetPos, dir);
-                    return; // 여기서도 멈춤
+                    box.DestroyBox();
+                    blocked = true;
+                    break;
                 }
             }
 
-            // 아무 것도 없으면 폭발 진행
+            // 항상 이펙트 먼저 생성
             CreateExplosion(targetPos, dir);
+
+            // 막히면 여기서 멈춘다 (그 이후 칸으로 안 감)
+            if (blocked)
+                return;
         }
     }
 
@@ -68,6 +74,7 @@ public class Bomb : MonoBehaviour
 
         if (explosion.TryGetComponent<Explosion>(out var explosionScript))
         {
+            explosionScript.SetOwner(ownerCharacterId);
             // 방향별 시각적 처리 (예: 중앙, 끝, 방향)
             if (direction == Vector2.zero)
                 explosionScript.SetActiveRenderer(explosionScript.middle); // 중심

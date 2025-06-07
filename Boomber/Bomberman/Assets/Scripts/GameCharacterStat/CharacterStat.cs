@@ -15,6 +15,11 @@ public class CharacterStat
     public bool canDestory;
     public bool isInvincible;
 
+    [Header("체력 상태")]
+    private int maxHP = 3;
+    private int currentHP = 3;
+
+
     // ==GETTERS==
 
     public float GetMoveSpeed() => moveSpeed;
@@ -22,6 +27,11 @@ public class CharacterStat
     public int GetBombCount() => bombCount;
     public bool GetCanDestory() => canDestory;
     public bool GetIsInvincible() => isInvincible;
+
+    public int GetCurrentHP () => currentHP;
+    public bool GetIsDead() => currentHP <= 0;
+
+
 
     // ==SETTERS==
 
@@ -49,6 +59,14 @@ public class CharacterStat
     {
         isInvincible = value;
     }
+
+    public void ApplyDamage(int amount)
+    {
+        currentHP = Mathf.Max(0, currentHP - amount);
+    }
+
+
+
 
     ///<summary>
     /// 능력치 복사본 생성. <- 능력을 얼마나 지속시킬지를 위해서. 즉 원래상태로 되돌릴 수 도 있기 때문에 원본 지킴이

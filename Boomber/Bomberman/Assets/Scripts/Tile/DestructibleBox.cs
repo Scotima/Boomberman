@@ -12,6 +12,8 @@ public class DestructibleBox : MonoBehaviour
     [Header("아이템 드랍 확률 (0~1 사이)")]
     [Range(0f, 1f)] public float dropChance = 0.5f;
 
+    public static event System.Action<Vector2Int> OnBoxDestroyed;
+
 
     ///<summary>
     ///외부에서 호출 : 상자가 파괴될 때 실행
@@ -20,6 +22,17 @@ public class DestructibleBox : MonoBehaviour
 
     public void DestroyBox()
     {
+        Vector2Int tile = new Vector2Int(
+        Mathf.RoundToInt(transform.position.x),
+        Mathf.RoundToInt(transform.position.y)
+        );
+
+        GameInstance.Instance.RemoveBox(tile);
+        Debug.Log($"[DestructibleBox] DestroyBox 호출됨 - tile: {tile}");
+
+        GameInstance.Instance.map.SetTileEmpty(tile);
+
+
         TryDropItem();
         Destroy(gameObject);
     }
@@ -59,4 +72,13 @@ public class DestructibleBox : MonoBehaviour
         }
     }
 
+     private void OnDestroy()
+    {
+        Vector2Int tile = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x), // tileSize 정수라면 그대로 사용
+            Mathf.RoundToInt(transform.position.y)
+        );
+        OnBoxDestroyed?.Invoke(tile);
+        Debug.Log($"[DestructibleBox] 상자 파괴 → 타일 제거 요청: {tile}");
+    }
 }

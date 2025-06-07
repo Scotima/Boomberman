@@ -19,7 +19,7 @@ public class GameModeManager : MonoBehaviour
 
     private void Start()
     {
-        StartGame(); // 진입점
+        //StartGame(); // 진입점
     }
 
     /// <summary>
@@ -38,6 +38,7 @@ public class GameModeManager : MonoBehaviour
         int height = mapGenerator.GetMapHeight();
         int playerCount = mapGenerator.GetPlayerCount();
 
+        GameInstance.Instance.map = mapGenerator;
         GenerateSpawnPoints(width, height, playerCount);
         SpawnPlayers();
     }
@@ -60,12 +61,13 @@ public class GameModeManager : MonoBehaviour
 
             character.map = mapGenerator;
             character.bombPrefab = bombPrefab;
+            GameInstance.Instance.RegisterCharacter(characterId, new CharacterStat(), character);
 
             character.Initialize();
             Debug.Log($"[GM] mapGenerator is null? {mapGenerator == null}");
 
 
-            GameInstance.Instance.RegisterCharacter(characterId, new CharacterStat());
+
         }
     }
 
